@@ -37,11 +37,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         text1 = (TextView) findViewById(R.id.text1);
         text2 = (TextView) findViewById(R.id.text2);
 
-        text1.setText("Click me");
-        text2.setText("Click me");
+        if (savedInstanceState == null) {
+            text1.setText("Click me");
+            text2.setText("Click me");
+        }
+        else {
+            setTextByState(savedInstanceState.getString("state1"), text1);
+            setTextByState(savedInstanceState.getString("state2"), text2);
+        }
 
         text1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,13 +63,14 @@ public class MainActivity extends AppCompatActivity {
                 loadFromUrl(URL_2);
             }
         });
-
         UrlDownloader.getInstance().setCallback(new UrlDownloader.Callback() {
             @Override
             public void onLoaded(String key, String value) {
                 onTextLoaded(key, value);
             }
         });
+
+
     }
 
     private void loadFromUrl(String url) {
@@ -85,5 +93,30 @@ public class MainActivity extends AppCompatActivity {
             return text2;
         }
         throw new IllegalArgumentException("Unknown url: " + url);
+    }
+    private String urlForTextView(TextView view){
+        int id = view.getId();
+        if (id == R.id.text1) {
+            return URL_1;
+        } else if (id == R.id.text2) {
+            return URL_2;
+        }
+        throw new IllegalArgumentException("Unknown view");
+    }
+    private void setTextByState (String state, TextView view) throws IllegalArgumentException{
+
+        String url = urlForTextView(view);
+        String text = state;
+        String cachedText = UrlDownloader.getInstance().getTextFromCache(url);
+        if (cachedText != null && !state.equals("Click me") ){ //Кнопка была нажата и результат уже загружен
+            text = cachedText;
+        }
+        view.setText(text);
+    }
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putString("state1", text1.getText().toString());
+        savedInstanceState.putString("state2", text2.getText().toString());
+        super.onSaveInstanceState(savedInstanceState);
     }
 }

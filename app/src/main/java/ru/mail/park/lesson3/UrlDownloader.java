@@ -34,7 +34,9 @@ public class UrlDownloader {
     public void setCallback(Callback callback) {
         this.callback = callback;
     }
-
+    public String getTextFromCache(String url){
+        return cache.get(url);
+    }
     public void load(final String url) {
         String cachedResult = cache.get(url);
         if (cachedResult != null) {
@@ -83,11 +85,7 @@ public class UrlDownloader {
                         .build()
         ).execute();
 
-        try {
-            return response.body().string();
-        } finally {
-            response.close();
-        }
+        return response.body().string();
     }
 
 }
